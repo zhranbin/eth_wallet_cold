@@ -257,7 +257,7 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
       final wallet = Wallet.createNew(privateKey, '123456', Random.secure());
       final walletJson = wallet.toJson();
       AccountModel account = AccountModel(
-        name: "靓号 123456",
+        name: "靓号 $addressStr",
         address: privateKey.address.hex,
         mnemonic: mnemonic,
         keystore: walletJson,
