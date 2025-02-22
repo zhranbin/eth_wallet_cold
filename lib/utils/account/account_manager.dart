@@ -41,7 +41,7 @@ class AccountManager {
 
   // 创建账户
   static Future<AccountModel?> createAccount({required String name, required String password, int strength = 128}) async {
-    final result = await runInIsolate<AccountModel>((){
+    final result = await runInIsolate<AccountModel>((_){
       return newAccount(name: name, password: password, strength: strength);
     },);
     return result;
@@ -50,7 +50,7 @@ class AccountManager {
   // 通过私钥创建账户
   static Future<AccountModel?> createAccountFromPrivateKey({required String name, required String privateKey, required String password}) async {
     String privateKeyHex = '0x${privateKey.replaceAll('0x', '')}';
-    final result = await runInIsolate<AccountModel>((){
+    final result = await runInIsolate<AccountModel>((_){
       try {
         final wallet = Wallet.createNew(EthPrivateKey.fromHex(privateKeyHex), password, Random.secure());
         final walletJson = wallet.toJson();
@@ -72,7 +72,7 @@ class AccountManager {
 
   // 通过助记词创建账户
   static Future<AccountModel?> createAccountFromMnemonic({required String name, required String mnemonic, required String password}) async {
-    final result = await runInIsolate<AccountModel?>((){
+    final result = await runInIsolate<AccountModel?>((_){
       try {
         // 将助记词转换为种子
         Uint8List seed = bip39.mnemonicToSeed(mnemonic);
@@ -105,7 +105,7 @@ class AccountManager {
 
   // 通过keystore创建账户
   static Future<AccountModel?> createAccountFromJson({required String name, required String json, required String password}) async {
-    final result = await runInIsolate<AccountModel?>((){
+    final result = await runInIsolate<AccountModel?>((_){
       try {
         final wallet = Wallet.fromJson(json, password);
         return AccountModel(
@@ -127,7 +127,7 @@ class AccountManager {
 
 
   static Future<String> getPrivateKey({required String json, required String password}) async {
-    final result = await runInIsolate<String>((){
+    final result = await runInIsolate<String>((_){
       try {
         final wallet = Wallet.fromJson(json, password);
         return wallet.privateKey.privateKey.toHexString();
@@ -141,7 +141,7 @@ class AccountManager {
 
 
   static Future<String> changePassword({required String json, required String oldPassword, required String newPassword}) async {
-    final result = await runInIsolate<String>((){
+    final result = await runInIsolate<String>((_){
       try {
         final wallet = Wallet.fromJson(json, oldPassword);
         final newWallet = Wallet.createNew(wallet.privateKey, newPassword, Random.secure());
@@ -156,7 +156,7 @@ class AccountManager {
 
 
   static Future<String> getAddress({required String json, required String password}) async {
-    final result = await runInIsolate<String>((){
+    final result = await runInIsolate<String>((_){
       try {
         final wallet = Wallet.fromJson(json, password);
         return wallet.privateKey.address.hex;

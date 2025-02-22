@@ -37,6 +37,7 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
   bool _isLoading = false;
   bool _isNeedCreate = false;
   List<String> _addresses = [];
+  String _password = "";
 
   @override
   void initState() {
@@ -99,13 +100,14 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
     }
   }
 
-
-
   _start() async {
     if (!_isNeedCreate) {
       return;
     }
-    final result = await runInIsolate<AccountModel?>((){
+    if (_password.isEmpty) {
+      _password = await MySharedPreferences.getWalletPassword() ?? '';
+    }
+    final result = await runInIsolate<AccountModel?>((pwd){
       // 生成随机的助记词
       String mnemonic = bip39.generateMnemonic(strength: 256);
       // 将助记词转换为种子
@@ -122,8 +124,7 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
       final address = privateKey.address;
       // 如果address 以 0x 开头，则去掉
       String addressStr = address.hex.startsWith("0x") ? address.hex.substring(2) : address.hex;
-      print("${addressStr}");
-      // 如果addressStr 以‘111’，‘222’，‘333’开头或接结尾就保留
+      print("-${addressStr}-");
       if (addressStr.startsWith("11111") ||
           addressStr.startsWith("22222") ||
           addressStr.startsWith("33333") ||
@@ -168,11 +169,11 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
           addressStr.endsWith("ddddd") ||
           addressStr.endsWith("eeeee") ||
           addressStr.endsWith("fffff") ) {
-        print("--------- ${addressStr} ------------");
-        final wallet = Wallet.createNew(privateKey, '123456', Random.secure());
+        print("--------- --------- ${addressStr} ------------");
+        final wallet = Wallet.createNew(privateKey, pwd, Random.secure());
         final walletJson = wallet.toJson();
         AccountModel account = AccountModel(
-          name: "靓号 123456",
+          name: "靓号 $addressStr",
           address: privateKey.address.hex,
           mnemonic: mnemonic,
           keystore: walletJson,
@@ -181,7 +182,7 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
         return account;
       }
       return null;
-    },);
+    }, data: _password);
     if (result != null) {
       await AccountProvider.addAccount(result);
       setState(() {
@@ -190,86 +191,5 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
     }
     _start();
   }
-
-
-  Future<AccountModel?> createAction() async {
-    // 生成随机的助记词
-    String mnemonic = bip39.generateMnemonic(strength: 256);
-    // 将助记词转换为种子
-    Uint8List seed = bip39.mnemonicToSeed(mnemonic);
-    // 从种子生成根私钥
-    bip32.BIP32 root = bip32.BIP32.fromSeed(seed);
-    // 这里的路径可以根据需要进行调整
-    bip32.BIP32 child = root.derivePath("m/44'/60'/0'/0/0");
-    // 获取子私钥的字节数组
-    Uint8List privateKeyBytes = child.privateKey ?? Uint8List(0);
-    // 将字节数组转换为十六进制字符串表示私钥
-    String privateKeyHex = privateKeyBytes.toHexString();
-    EthPrivateKey privateKey = EthPrivateKey.fromHex(privateKeyHex);
-    final address = privateKey.address;
-    // 如果address 以 0x 开头，则去掉
-    String addressStr = address.hex.startsWith("0x") ? address.hex.substring(2) : address.hex;
-    // print("${addressStr}");
-    // 如果addressStr 以‘111’，‘222’，‘333’开头或接结尾就保留
-    if (addressStr.startsWith("11111") ||
-        addressStr.startsWith("22222") ||
-        addressStr.startsWith("33333") ||
-        addressStr.startsWith("44444") ||
-        addressStr.startsWith("55555") ||
-        addressStr.startsWith("66666") ||
-        addressStr.startsWith("77777") ||
-        addressStr.startsWith("88888") ||
-        addressStr.startsWith("99999") ||
-        addressStr.startsWith("00000") ||
-        addressStr.startsWith("12345") ||
-        addressStr.startsWith("23456") ||
-        addressStr.startsWith("34567") ||
-        addressStr.startsWith("45678") ||
-        addressStr.startsWith("56789") ||
-        addressStr.startsWith("67890") ||
-        addressStr.startsWith("aaaaa") ||
-        addressStr.startsWith("bbbbb") ||
-        addressStr.startsWith("ccccc") ||
-        addressStr.startsWith("ddddd") ||
-        addressStr.startsWith("eeeee") ||
-        addressStr.startsWith("fffff") ||
-        addressStr.endsWith("11111") ||
-        addressStr.endsWith("22222") ||
-        addressStr.endsWith("33333") ||
-        addressStr.endsWith("44444") ||
-        addressStr.endsWith("55555") ||
-        addressStr.endsWith("66666") ||
-        addressStr.endsWith("77777") ||
-        addressStr.endsWith("88888") ||
-        addressStr.endsWith("99999") ||
-        addressStr.endsWith("00000") ||
-        addressStr.endsWith("12345") ||
-        addressStr.endsWith("23456") ||
-        addressStr.endsWith("34567") ||
-        addressStr.endsWith("45678") ||
-        addressStr.endsWith("56789") ||
-        addressStr.endsWith("67890") ||
-        addressStr.endsWith("aaaaa") ||
-        addressStr.endsWith("bbbbb") ||
-        addressStr.endsWith("ccccc") ||
-        addressStr.endsWith("ddddd") ||
-        addressStr.endsWith("eeeee") ||
-        addressStr.endsWith("fffff") ) {
-      print("--------- ${addressStr} ------------");
-      var pwd = await MySharedPreferences.getWalletPassword() ?? '';
-      final wallet = Wallet.createNew(privateKey, pwd, Random.secure());
-      final walletJson = wallet.toJson();
-      AccountModel account = AccountModel(
-        name: "靓号 $addressStr",
-        address: privateKey.address.hex,
-        mnemonic: mnemonic,
-        keystore: walletJson,
-        isEncryption: true,
-      );
-      return account;
-    }
-    return null;
-  }
-
 
 }
