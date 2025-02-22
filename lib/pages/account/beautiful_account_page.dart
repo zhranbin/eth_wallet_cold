@@ -1,6 +1,7 @@
 import 'package:eth_wallet/provider/language_provider.dart';
 import 'package:eth_wallet/provider/theme_provider.dart';
 import 'package:eth_wallet/utils/account/byte.dart';
+import 'package:eth_wallet/utils/extensions/string_extensions.dart';
 import 'package:eth_wallet/utils/extensions/widget_extensions.dart';
 import 'package:eth_wallet/utils/my_loading.dart';
 import 'package:eth_wallet/widget/my_app_bar.dart';
@@ -18,6 +19,7 @@ import '../../main.dart';
 import '../../provider/account_provider.dart';
 import '../../utils/Isolate_utils.dart';
 import '../../utils/account/account_model.dart';
+import '../../utils/my_shared_preferences.dart';
 import '../../widget/my_button.dart';
 
 class BeautifulAccountPage extends StatefulWidget {
@@ -190,7 +192,7 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
   }
 
 
-  AccountModel? createAction() {
+  Future<AccountModel?> createAction() async {
     // 生成随机的助记词
     String mnemonic = bip39.generateMnemonic(strength: 256);
     // 将助记词转换为种子
@@ -254,7 +256,8 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
         addressStr.endsWith("eeeee") ||
         addressStr.endsWith("fffff") ) {
       print("--------- ${addressStr} ------------");
-      final wallet = Wallet.createNew(privateKey, '123456', Random.secure());
+      var pwd = await MySharedPreferences.getWalletPassword() ?? '';
+      final wallet = Wallet.createNew(privateKey, pwd, Random.secure());
       final walletJson = wallet.toJson();
       AccountModel account = AccountModel(
         name: "靓号 $addressStr",
