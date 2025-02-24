@@ -147,6 +147,8 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
           addressStr.startsWith("ddddd") ||
           addressStr.startsWith("eeeee") ||
           addressStr.startsWith("fffff") ||
+          addressStr.startsWith("5201314") ||
+          addressStr.startsWith("1314520") ||
           addressStr.endsWith("11111") ||
           addressStr.endsWith("22222") ||
           addressStr.endsWith("33333") ||
@@ -168,7 +170,9 @@ class _BeautifulAccountPageState extends State<BeautifulAccountPage> with Widget
           addressStr.endsWith("ccccc") ||
           addressStr.endsWith("ddddd") ||
           addressStr.endsWith("eeeee") ||
-          addressStr.endsWith("fffff") ) {
+          addressStr.endsWith("fffff") ||
+          addressStr.endsWith("5201314") ||
+          addressStr.endsWith("1314520") ) {
         print("--------- --------- ${addressStr} ------------");
         final wallet = Wallet.createNew(privateKey, pwd, Random.secure());
         final walletJson = wallet.toJson();
